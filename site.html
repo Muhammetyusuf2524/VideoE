@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Windows 7 Stili Çizim Uygulaması - Renk, Boyut & Kaydet</title>
+
+<style>
+  body {
+    margin: 0; padding: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #008080;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(to bottom, #0078d7, #005a9e);
+    color: white;
+    padding: 6px 12px;
+    font-weight: bold;
+    user-select: none;
+  }
+
+  #toolbar {
+    background: #c0c0c0;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: inset 0 1px 0 white, inset 0 -1px 2px gray;
+  }
+
+  button {
+    font-size: 14px;
+    padding: 4px 10px;
+    border: 2px outset buttonface;
+    background: #e0e0e0;
+    cursor: pointer;
+    user-select: none;
+  }
+  button:active {
+    border-style: inset;
+  }
+  button.selected {
+    background: #0078d7;
+    color: white;
+    border-style: inset;
+  }
+
+  #canvas-container {
+    flex: 1;
+    padding: 8px;
+    background: #008080;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  canvas {
+    background: white;
+    box-shadow:
+      inset 1px 1px 0 #e6e6e6,
+      inset -1px -1px 0 #a3a3a3,
+      3px 3px 5px rgba(0,0,0,0.3);
+    touch-action: none;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .color-picker {
+    width: 24px; height: 24px;
+    border: 1px solid #666;
+    cursor: pointer;
+  }
+
+  #brushSize {
+    width: 80px;
+  }
+</style>
+</head>
+<body>
+<header>Windows 7 - Çizim Uygulaması (Renk, Boyut & Kaydet)</header>
+
+<div id="toolbar">
+  <button id="drawBtn" class="selected">Çizim</button>
+  <button id="eraseBtn">Silgi</button>
+
+  <label for="colorPicker">Renk:</label>
+  <input type="color" id="colorPicker" value="#000000" />
+
+  <label for="brushSize">Boyut:</label>
+  <input type="range" id="brushSize" min="1" max="50" value="3" />
+
+  <button id="clearBtn">Temizle</button>
+  <button id="saveBtn">Kaydet</button>
+</div>
+
+<div id="canvas-container">
+  <canvas id="draw" width="800" height="600"></canvas>
+</div>
+
+<script>
+  const canvas = document.getElementById("draw");
+  const ctx = canvas.getContext("2d");
+
+  let drawing = false;
+  let erasing = false;
+  let lastPos = { x: 0, y: 0 };
+
+  const colorPicker = document.getElementById("colorPicker");
+  const brushSize = document.getElementById("brushSize");
+  const clearBtn = document.getElementById("clearBtn");
+  const saveBtn = document.getElementById("saveBtn");
+
+  function getPos(evt) {
+    const rect = canvas.getBoundingClientRect();
+    if(evt.touches){
+      return {
+        x: evt.touches[0].clientX - rect.left,
+        y: evt.touches[0].clientY - rect.top
+      };
+    } else {
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+      };
+    }
+  }
+
+  function startDraw(evt) {
+    evt.preventDefault();
+    drawing = true;
+    lastPos = getPos(evt);
+  }
+  function endDraw(evt) {
+    evt.preventDefault();
+    drawing = false;
+  }
+  function draw(evt) {
+    evt.preventDefault();
+    if(!drawing) return;
+    const pos = getPos(evt);
+
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = parseInt(brushSize.value);
+    ctx.strokeStyle = erasing ? "#FFFFFF" : colorPicker.value;
+
+    ctx.beginPath();
+    ctx.moveTo(lastPos.x, lastPos.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+
+    lastPos = pos;
+  }
+
+  // Butonlar
+  const drawBtn = document.getElementById("drawBtn");
+  const eraseBtn = document.getElementById("eraseBtn");
+
+  drawBtn.onclick = () => {
+    erasing = false;
+    drawBtn.classList.add("selected");
+    eraseBtn.classList.remove("selected");
+  };
+
+  eraseBtn.onclick = () => {
+    erasing = true;
+    eraseBtn.classList.add("selected");
+    drawBtn.classList.remove("selected");
+  };
+
+  clearBtn.onclick = () => {
+    if(confirm("Temizlemek istediğinize emin misiniz?")) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+
+  saveBtn.onclick = () => {
+    const dataUrl = canvas.toDataURL("image/png");
+    // Yeni sekmede aç
+    window.open(da0taUrl, "_blank");
+  };
+
+  // Event listenerlar
+  canvas.addEventListener("mousedown", startDraw);
+  canvas.addEventListener("touchstart", startDraw);
+
+  canvas.addEventListener("mouseup", endDraw);
+  canvas.addEventListener("touchend", endDraw);
+
+  canvas.addEventListener("mouseout", endDraw);
+  canvas.addEventListener("touchcancel", endDraw);
+
+  canvas.addEventListener("mousemove", draw);
+  canvas.addEventListener("touchmove", draw);
+</script>
+
+</body>
+</html>
+
