@@ -4,8 +4,8 @@ import ure
 import machine
 import time
 
-SSID = "FiberHGW_TP056C"
-PASSWORD = "C9j9esFPU97L"
+SSID = " ****** "   
+PASSWORD = " ****** "
 
 # WiFi bağlanma
 wlan = network.WLAN(network.STA_IF)
